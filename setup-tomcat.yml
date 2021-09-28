@@ -1,0 +1,36 @@
+---
+- hosts: webservers
+  user: ansible
+  become: true
+  connection: ssh
+  tasks:
+          - name: installing java package on redhat
+            yum:
+                name: java 
+                state: present
+            when: ansible_os_family == 'RedHat'
+          - name: installing java package on debian
+            apt:
+                name: default-jdk
+                state: present
+            when: ansible_os_family == 'Debian'
+          - name: download apache tomcat package
+            get_url:
+                url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.71/bin/apache-tomcat-8.5.71.tar.gz
+                dest: /opt
+          - name: extract the apache tomcat package
+            unarchive:
+                src: /opt/apache-tomcat-8.5.71.tar.gz
+                dest: /opt
+                remote_src: yes
+          - name: giving execute permissions
+            file:
+                path: /opt/apache-tomcat-8.5.71/bin/startup.sh
+                mode: 777
+          - name: starting tomcat services
+            shell: nohup ./startup.sh
+            args:
+                chdir: /opt/apache-tomcat-8.5.71/bin
+
+
+                      
